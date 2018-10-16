@@ -1,0 +1,11 @@
+{
+    "name": "OttoDiy",
+    "type": "arduino",
+    "factory": "arduinolib/Otto/examples/otto4kittenblock/otto4kittenblock.ino",
+    "hex": "otto.hex",
+    "board": {
+        "UNO": ["arduino:avr:uno", 115200],
+        "Nano328P": ["arduino:avr:nano:cpu=atmega328", 57600]
+    },
+    "extensions": ["OttoDiy"]
+}
