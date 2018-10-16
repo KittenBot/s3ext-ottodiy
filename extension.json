@@ -7,5 +7,6 @@
         "UNO": ["arduino:avr:uno", 115200],
         "Nano328P": ["arduino:avr:nano:cpu=atmega328", 57600]
     },
-    "extensions": ["OttoDiy"]
+    "extensions": ["OttoDiy"],
+    "image": "ottodiy.png"
 }
