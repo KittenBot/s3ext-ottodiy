@@ -42,7 +42,8 @@ class OttoDIY {
             const lines = this.lineBuffer.split('\n');
             this.lineBuffer = lines.pop();
             for (const l of lines){
-                if (this.reporter) this.reporter(l);
+                const ret = this.parseCmd(l);
+                if (this.reporter) this.reporter(ret);
             }
         }
     }
@@ -1032,11 +1033,11 @@ class OttoDIY {
     }
 
     distance (){
-        return this.report('D\r\n').then(ret => this.parseCmd(ret));
+        return this.report('D\r\n');
     }
 
     noise (){
-        return this.report('N\r\n').then(ret => this.parseCmd(ret));
+        return this.report('N\r\n');
     }
 
 
