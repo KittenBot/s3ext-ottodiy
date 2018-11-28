@@ -8,6 +8,252 @@ const BlockType = Scratch.BlockType;
 const formatMessage = Scratch.formatMessage;
 const log = Scratch.log;
 
+
+const ottoCommon = gen => {
+    gen.includes_['otto'] = `
+#include <BatReader.h>
+#include <US.h>
+#include "MaxMatrix.h"
+MaxMatrix ledmatrix=MaxMatrix(12,10,11, 1); //PIN  12=DIN, PIN 10=CS, PIN 11=CLK
+
+//-- Library to manage serial commands
+#include <OttoSerialCommand.h>
+OttoSerialCommand SCmd;  //The SerialCommand object
+
+//-- Otto Library
+#include <Otto.h>
+Otto Otto;  //This is Otto!
+
+#define PIN_YL 2 //servo[0]
+#define PIN_YR 3 //servo[1]
+#define PIN_RL 4 //servo[2]
+#define PIN_RR 5 //servo[3]
+
+//-- Movement parameters
+int T=1000;              //Initial duration of movement
+`;
+    gen.setupCodes_['otto'] = `
+    //Serial communication initialization
+    Serial.begin(115200);  
+    //Set the servo pins
+    Otto.init(PIN_YL,PIN_YR,PIN_RL,PIN_RR,true);
+    // set up Matrix display
+    ledmatrix.init();
+    ledmatrix.setIntensity(1);
+    //Set a random seed
+    randomSeed(analogRead(A6));
+    //Otto wake up!
+    Otto.sing(S_connection);
+    Otto.home();`;
+
+    gen.definitions_['otto_move'] = `
+//-- Function to execute the right movement according the movement command received.
+void move(int moveId, int moveSize){
+
+  bool manualMode = false;
+
+  switch (moveId) {
+    case 0:
+      Otto.home();
+      break;
+    case 1: //M 1 1000 
+      Otto.walk(1,T,1);
+      break;
+    case 2: //M 2 1000 
+      Otto.walk(1,T,-1);
+      break;
+    case 3: //M 3 1000 
+      Otto.turn(1,T,1);
+      break;
+    case 4: //M 4 1000 
+      Otto.turn(1,T,-1);
+      break;
+    case 5: //M 5 1000 30 
+      Otto.updown(1,T,moveSize);
+      break;
+    case 6: //M 6 1000 30
+      Otto.moonwalker(1,T,moveSize,1);
+      break;
+    case 7: //M 7 1000 30
+      Otto.moonwalker(1,T,moveSize,-1);
+      break;
+    case 8: //M 8 1000 30
+      Otto.swing(1,T,moveSize);
+      break;
+    case 9: //M 9 1000 30 
+      Otto.crusaito(1,T,moveSize,1);
+      break;
+    case 10: //M 10 1000 30 
+      Otto.crusaito(1,T,moveSize,-1);
+      break;
+    case 11: //M 11 1000 
+      Otto.jump(1,T);
+      break;
+    case 12: //M 12 1000 30 
+      Otto.flapping(1,T,moveSize,1);
+      break;
+    case 13: //M 13 1000 30
+      Otto.flapping(1,T,moveSize,-1);
+      break;
+    case 14: //M 14 1000 20
+      Otto.tiptoeSwing(1,T,moveSize);
+      break;
+    case 15: //M 15 500 
+      Otto.bend(1,T,1);
+      break;
+    case 16: //M 16 500 
+      Otto.bend(1,T,-1);
+      break;
+    case 17: //M 17 500 
+      Otto.shakeLeg(1,T,1);
+      break;
+    case 18: //M 18 500 
+      Otto.shakeLeg(1,T,-1);
+      break;
+    case 19: //M 19 500 20
+      Otto.jitter(1,T,moveSize);
+      break;
+    case 20: //M 20 500 15
+      Otto.ascendingTurn(1,T,moveSize);
+      break;
+    default:
+        manualMode = true;
+      break;
+  }
+}
+`
+    gen.definitions_['otto_ges'] = `
+//-- Function to receive gesture commands
+void receiveGesture(int gesture){
+    Otto.home(); 
+
+    switch (gesture) {
+      case 1: //H 1 
+        Otto.playGesture(OttoHappy);
+        break;
+      case 2: //H 2 
+        Otto.playGesture(OttoSuperHappy);
+        break;
+      case 3: //H 3 
+        Otto.playGesture(OttoSad);
+        break;
+      case 4: //H 4 
+        Otto.playGesture(OttoSleeping);
+        break;
+      case 5: //H 5  
+        Otto.playGesture(OttoFart);
+        break;
+      case 6: //H 6 
+        Otto.playGesture(OttoConfused);
+        break;
+      case 7: //H 7 
+        Otto.playGesture(OttoLove);
+        break;
+      case 8: //H 8 
+        Otto.playGesture(OttoAngry);
+        break;
+      case 9: //H 9  
+        Otto.playGesture(OttoFretful);
+        break;
+      case 10: //H 10
+        Otto.playGesture(OttoMagic);
+        break;  
+      case 11: //H 11
+        Otto.playGesture(OttoWave);
+        break;   
+      case 12: //H 12
+        Otto.playGesture(OttoVictory);
+        break; 
+      case 13: //H 13
+        Otto.playGesture(OttoFail);
+        break;         
+      default:
+        break;
+    }
+}
+`
+
+    gen.definitions_['otto_sing'] = `
+//-- Function to receive sing commands
+void receiveSing(int sing){
+
+    Otto.home(); 
+
+    switch (sing) {
+      case 1: //K 1 
+        Otto.sing(S_connection);
+        break;
+      case 2: //K 2 
+        Otto.sing(S_disconnection);
+        break;
+      case 3: //K 3 
+        Otto.sing(S_surprise);
+        break;
+      case 4: //K 4 
+        Otto.sing(S_OhOoh);
+        break;
+      case 5: //K 5  
+        Otto.sing(S_OhOoh2);
+        break;
+      case 6: //K 6 
+        Otto.sing(S_cuddly);
+        break;
+      case 7: //K 7 
+        Otto.sing(S_sleeping);
+        break;
+      case 8: //K 8 
+        Otto.sing(S_happy);
+        break;
+      case 9: //K 9  
+        Otto.sing(S_superHappy);
+        break;
+      case 10: //K 10
+        Otto.sing(S_happy_short);
+        break;  
+      case 11: //K 11
+        Otto.sing(S_sad);
+        break;   
+      case 12: //K 12
+        Otto.sing(S_confused);
+        break; 
+      case 13: //K 13
+        Otto.sing(S_fart1);
+        break;
+      case 14: //K 14
+        Otto.sing(S_fart2);
+        break;
+      case 15: //K 15
+        Otto.sing(S_fart3);
+        break;    
+      case 16: //K 16
+        Otto.sing(S_mode1);
+        break; 
+      case 17: //K 17
+        Otto.sing(S_mode2);
+        break; 
+      case 18: //K 18
+        Otto.sing(S_mode3);
+        break;   
+      case 19: //K 19
+        Otto.sing(S_buttonPushed);
+        break;                      
+      default:
+        break;
+    }
+}
+`
+
+    gen.definitions_['otto_buzz'] = `
+//-- Function to receive buzzer commands
+void recieveBuzzer(int frec, int duration){
+  Otto._tone(frec, duration, 1);   
+}
+`
+
+};
+
+
+
 class OttoDIY {
     constructor (runtime){
         this.runtime = runtime;
@@ -51,7 +297,7 @@ class OttoDIY {
     onclose (error){
         log.warn('on close', error);
         this.session = null;
-        this.runtime.emit(this.runtime.constructor.PERIPHERAL_ERROR);
+        this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECT_ERROR);
     }
 
     // method required by vm runtime
@@ -161,7 +407,10 @@ class OttoDIY {
                             defaultValue: 1000
                         }
                     },
-                    func: 'move'
+                    func: 'move',
+                    gen: {
+                        arduino: this.moveCpp
+                    }
                 },
                 {
                     opcode: 'gesture',
@@ -178,7 +427,10 @@ class OttoDIY {
                             defaultValue: 1
                         }
                     },
-                    func: 'gesture'
+                    func: 'gesture',
+                    gen: {
+                        arduino: this.gestureCpp
+                    }
                 },
                 {
                     opcode: 'sing',
@@ -195,7 +447,10 @@ class OttoDIY {
                             defaultValue: 1
                         }
                     },
-                    func: 'sing'
+                    func: 'sing',
+                    gen: {
+                        arduino: this.singCpp
+                    }
                 },
                 {
                     opcode: 'melody',
@@ -217,7 +472,10 @@ class OttoDIY {
                             defaultValue: '500'
                         }
                     },
-                    func: 'melody'
+                    func: 'melody',
+                    gen: {
+                        arduino: this.melodyCpp
+                    }
                 },
                 {
                     opcode: 'stop',
@@ -227,7 +485,10 @@ class OttoDIY {
                         id: 'OttoDIY.stop',
                         default: 'Stop'
                     }),
-                    func: 'stop'
+                    func: 'stop',
+                    gen: {
+                        arduino: this.stopCpp
+                    }
                 },
                 {
                     opcode: 'getDistance',
@@ -237,7 +498,10 @@ class OttoDIY {
                         id: 'OttoDIY.getDistance',
                         default: 'Get Distance'
                     }),
-                    func: 'distance'
+                    func: 'distance',
+                    gen: {
+                        arduino: this.distanceCpp
+                    }
                 },
                 '---',
                 {
@@ -1039,7 +1303,41 @@ class OttoDIY {
     noise (){
         return this.report('N\r\n');
     }
+    
+    moveCpp (gen, block){
+        ottoCommon(gen);
+        const code = gen.template2code(block, 'move');
+        return gen.line(code);
+    }
+    
+    gestureCpp (gen, block){
+        ottoCommon(gen);
+        const code = gen.template2code(block, 'receiveGesture');
+        return gen.line(code);
+    }
 
+    singCpp (gen, block){
+        ottoCommon(gen);
+        const code = gen.template2code(block, 'receiveSing');
+        return gen.line(code);
+    }
+
+    melodyCpp (gen, block){
+        ottoCommon(gen);
+        const code = gen.template2code(block, 'recieveBuzzer');
+        return gen.line(code);
+    }
+    
+    stopCpp (gen, block){
+        ottoCommon(gen);
+        const code = gen.template2code(block, 'Otto.home');
+        return gen.line(code);
+    }
+    
+    distanceCpp (gen, block){
+        ottoCommon(gen);
+        return gen.template2code(block, 'Otto.getDistance');
+    }
 
     parseCmd (cmd){
         const start = cmd.indexOf('&&');
