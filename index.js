@@ -505,55 +505,17 @@ class OttoDIY {
                 },
                 '---',
                 {
-                    opcode: 'putMouth',
+                    opcode: 'ledmatrix',
                     blockType: BlockType.COMMAND,
 
-                    text: formatMessage({
-                        id: 'OttoDIY.putMouth',
-                        default: 'Show Mouth: [MOUTH]'
-                    }),
+                    text: 'LED [MAT]',
                     arguments: {
-                        MOUTH: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'MOUTH',
-                            defaultValue: 1
+                        MAT: {
+                            type: ArgumentType.LEDMATRIX,
+                            defaultValue: '00000000024000000000042003c00000'
                         }
                     },
-                    blockDisabled: true,
-                    func: 'noop'
-                },
-                {
-                    opcode: 'animouth',
-                    blockType: BlockType.COMMAND,
-
-                    text: formatMessage({
-                        id: 'OttoDIY.animouth',
-                        default: 'Show Animation Mouth: [ANIMOUTH] in step [STEP]'
-                    }),
-                    arguments: {
-                        ANIMOUTH: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'ANIMOUTH',
-                            defaultValue: 1
-                        },
-                        STEP: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0
-                        }
-                    },
-                    blockDisabled: true,
-                    func: 'noop'
-                },
-                {
-                    opcode: 'clearmouth',
-                    blockType: BlockType.COMMAND,
-
-                    text: formatMessage({
-                        id: 'OttoDIY.clearmouth',
-                        default: 'Clear Mouth'
-                    }),
-                    blockDisabled: true,
-                    func: 'noop'
+                    func: 'ledmatrix'
                 },
                 {
                     opcode: 'getNoise',
@@ -564,7 +526,6 @@ class OttoDIY {
                         default: 'Get Noise'
                     }),
                     func: 'noise',
-                    blockDisabled: true
                 },
                 {
                     opcode: 'getLight',
@@ -582,7 +543,6 @@ class OttoDIY {
                         }
                     },
                     func: 'noop',
-                    blockDisabled: true
                 },
                 {
                     opcode: 'getButton',
@@ -600,7 +560,6 @@ class OttoDIY {
                         }
                     },
                     func: 'noop',
-                    blockDisabled: true
                 },
             ],
             menus: {
@@ -1290,6 +1249,11 @@ class OttoDIY {
     melody (args){
         const str = `T ${args.NOTE} ${args.BEATS}\r\n`;
         this.write(str);
+    }
+
+    ledmatrix (args){
+        let cmd = `L ${args.MAT}\r\n`;
+        this.write(cmd);
     }
 
     stop (){
